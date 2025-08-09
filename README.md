@@ -1,8 +1,21 @@
-BaseTip Jar - Ready-to-run (HTML + JS)
+# TipMyThread (Base Sepolia + Supabase)
 
-How to run:
-1. In Supabase SQL editor, run sql/setup.sql to create tables and policies.
-2. Open this folder in VS Code.
-3. Start Live Server (right-click index.html -> Open with Live Server) or run a simple HTTP server.
-4. Open index.html, generate a tip link (enter thread URL and wallet address).
-5. Open the generated tip link, connect MetaMask (Base Sepolia), and send a tip.
+A simple web app that lets users create and share crypto tip links for Twitter/X threads.  
+Built with **HTML, CSS, JavaScript**, **Supabase**, and supports **Base Sepolia testnet**.
+
+---
+
+## 🚀 Features
+- **Generate Tip Links** — Create a shareable link for tipping your Twitter/X thread.
+- **Base Sepolia Wallet Integration** — Connect MetaMask to send tips.
+- **Supabase Backend** — Store tip link data (thread URL, amount, message).
+- **Client-Only** — No backend server required, works fully in the browser.
+- **Vercel-Ready** — Easily deploy with one click.
+
+---
+
+## 📂 Tech Stack
+- **Frontend**: HTML, CSS, JavaScript (Vanilla)
+- **Database**: [Supabase](https://supabase.com/)
+- **Blockchain**: Base Sepolia Testnet (EVM-compatible)
+- **Hosting**: [Vercel](https://vercel.com/)
