@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>BaseTip Jar - Tip Creator</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8f8f8;
+      --text-primary: #000000;
+      --text-secondary: #666666;
+      --border-color: #000000;
+      --shadow-color: rgba(0, 0, 0, 0.1);
+      --accent-color: #000000;
+      --pixel-size: 2px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #000000;
+      --bg-secondary: #080808;
+      --text-primary: #ffffff;
+      --text-secondary: #999999;
+      --border-color: #ffffff;
+      --shadow-color: rgba(255, 255, 255, 0.1);
+      --accent-color: #ffffff;
+    }
+
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      transition: var(--transition);
+      background-image: 
+        radial-gradient(circle at 1px 1px, var(--text-primary) 1px, transparent 0);
+      background-size: 20px 20px;
+      animation: backgroundFloat 20s ease-in-out infinite;
+    }
+
+    @keyframes backgroundFloat {
+      0%, 100% { background-position: 0% 0%; }
+      50% { background-position: 100% 100%; }
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      background: var(--bg-primary);
+      border: 2px solid var(--border-color);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      transition: var(--transition);
+      z-index: 1000;
+    }
+
+    .theme-toggle:hover {
+      transform: scale(1.1);
+      box-shadow: 4px 4px 0 var(--border-color);
+    }
+
+    .theme-toggle:active {
+      transform: scale(0.95);
+    }
+
+    .container {
+      max-width: 500px;
+      width: 100%;
+      background: var(--bg-primary);
+      border: 3px solid var(--border-color);
+      box-shadow: 8px 8px 0 var(--border-color);
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+      animation: containerEntrance 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes containerEntrance {
+      0% {
+        transform: translateY(30px);
+        opacity: 0;
+        box-shadow: 0 0 0 var(--border-color);
+      }
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+        box-shadow: 8px 8px 0 var(--border-color);
+      }
+    }
+
+    .container::before {
+      content: '';
+      position: absolute;
+      top: -3px;
+      left: -3px;
+      right: -3px;
+      bottom: -3px;
+      background: linear-gradient(45deg, var(--border-color) 25%, transparent 25%),
+                  linear-gradient(-45deg, var(--border-color) 25%, transparent 25%),
+                  linear-gradient(45deg, transparent 75%, var(--border-color) 75%),
+                  linear-gradient(-45deg, transparent 75%, var(--border-color) 75%);
+      background-size: 8px 8px;
+      background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
+      z-index: -1;
+      opacity: 0.05;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 15px;
+      text-align: center;
+      position: relative;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: var(--text-primary);
+      background-image: repeating-linear-gradient(
+        90deg,
+        var(--text-primary) 0px,
+        var(--text-primary) 4px,
+        transparent 4px,
+        transparent 8px
+      );
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+      font-size: 0.9rem;
+      animation: fadeInUp 0.8s 0.2s both;
+    }
+
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .thread-box {
+      padding: 15px;
+      background: var(--bg-secondary);
+      border: 2px solid var(--border-color);
+      margin-bottom: 30px;
+      animation: fadeInUp 0.8s 0.3s both;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .thread-box::before {
+      content: '■';
+      position: absolute;
+      top: -1px;
+      left: -1px;
+      color: var(--text-primary);
+      font-size: 0.8rem;
+      line-height: 1;
+    }
+
+    .thread-box a {
+      color: var(--text-primary);
+      text-decoration: none;
+      font-size: 0.8rem;
+      word-break: break-all;
+      display: block;
+      font-weight: 600;
+    }
+
+    .thread-box a:hover {
+      text-decoration: underline;
+    }
+
+    .recipient-info {
+      margin-bottom: 30px;
+      padding: 20px;
+      background: var(--bg-secondary);
+      border: 2px solid var(--border-color);
+      border-left: 6px solid var(--border-color);
+      animation: fadeInUp 0.8s 0.4s both;
+      position: relative;
+    }
+
+    .recipient-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .recipient-label::before {
+      content: '▶';
+      margin-right: 8px;
+      font-size: 0.6rem;
+    }
+
+    .recipient-address {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-primary);
+      word-break: break-all;
+      background: var(--bg-primary);
+      padding: 12px 15px;
+      border: 2px solid var(--border-color);
+      font-weight: 600;
+    }
+
+    .wallet-section {
+      margin-bottom: 30px;
+      animation: fadeInUp 0.8s 0.5s both;
+    }
+
+    .connected-address {
+      margin-top: 15px;
+      font-size: 0.8rem;
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg-secondary);
+      padding: 12px 15px;
+      border: 2px solid var(--border-color);
+      border-left: 6px solid var(--text-primary);
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: var(--transition);
+      font-weight: 600;
+    }
+
+    .connected-address.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .amount-section {
+      margin-bottom: 30px;
+      animation: fadeInUp 0.8s 0.6s both;
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      position: relative;
+      color: var(--text-primary);
+      transition: var(--transition);
+    }
+
+    label::before {
+      content: '■';
+      font-size: 0.6rem;
+      margin-right: 8px;
+      opacity: 0.8;
+    }
+
+    input {
+      width: 100%;
+      padding: 15px 20px;
+      border: 2px solid var(--border-color);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: var(--transition);
+      position: relative;
+      outline: none;
+      font-weight: 500;
+    }
+
+    input:focus {
+      border-color: var(--border-color);
+      box-shadow: inset 4px 4px 0 var(--shadow-color);
+      transform: translateY(-2px);
+    }
+
+    input::placeholder {
+      color: var(--text-secondary);
+      opacity: 0.7;
+    }
+
+    .button-container {
+      display: flex;
+      gap: 10px;
+      margin-top: 30px;
+      animation: fadeInUp 0.8s 0.7s both;
+    }
+
+    button {
+      flex: 1;
+      padding: 18px 24px;
+      background: var(--text-primary);
+      color: var(--bg-primary);
+      border: 2px solid var(--border-color);
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 0 var(--border-color);
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 0 var(--border-color);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        var(--shadow-color),
+        transparent
+      );
+      transition: left 0.5s;
+    }
+
+    button:hover::before {
+      left: 100%;
+    }
+
+    .secondary-btn {
+      background: var(--bg-primary) !important;
+      color: var(--text-primary) !important;
+      border: 2px solid var(--border-color) !important;
+    }
+
+    .secondary-btn:hover:not(:disabled) {
+      background: var(--text-primary) !important;
+      color: var(--bg-primary) !important;
+    }
+
+    .loading {
+      position: relative;
+    }
+
+    .loading::after {
+      content: '';
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--bg-primary);
+      border-top: 2px solid transparent;
+      border-radius: 0;
+      animation: spinSquare 1s linear infinite;
+    }
+
+    @keyframes spinSquare {
+      0% { transform: translateY(-50%) rotate(0deg); }
+      100% { transform: translateY(-50%) rotate(360deg); }
+    }
+
+    .status-text {
+      margin-top: 20px;
+      font-size: 0.9rem;
+      padding: 15px;
+      border-left: 4px solid var(--text-secondary);
+      background: var(--bg-secondary);
+      min-height: 20px;
+      transition: var(--transition);
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    .status-text.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .status-text.success {
+      border-left-color: var(--text-primary);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    .status-text.error {
+      border-left-color: var(--text-primary);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    .status-text a {
+      color: var(--text-primary);
+      text-decoration: underline;
+      font-weight: 600;
+    }
+
+    .copy-btn {
+      padding: 6px 12px !important;
+      font-size: 0.7rem !important;
+      margin-left: 10px;
+      background: var(--bg-primary) !important;
+      color: var(--text-primary) !important;
+      border: 1px solid var(--border-color) !important;
+      min-width: auto !important;
+      flex: none !important;
+    }
+
+    .copy-btn:hover {
+      background: var(--text-primary) !important;
+      color: var(--bg-primary) !important;
+      transform: translateY(-2px) !important;
+      box-shadow: 0 4px 0 var(--border-color) !important;
+    }
+
+    .history-section {
+      margin-top: 40px;
+      animation: fadeInUp 0.8s 0.8s both;
+    }
+
+    .history-section h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--text-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      position: relative;
+    }
+
+    .history-section h3::before {
+      content: '▼';
+      margin-right: 12px;
+      font-size: 0.8rem;
+    }
+
+    .tx-history {
+      border: 2px solid var(--border-color);
+      background: var(--bg-primary);
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .tx-item {
+      padding: 20px;
+      border-bottom: 2px solid var(--border-color);
+      transition: var(--transition);
+      position: relative;
+      background: var(--bg-primary);
+    }
+
+    .tx-item:last-child {
+      border-bottom: none;
+    }
+
+    .tx-item:hover {
+      background: var(--bg-secondary);
+      transform: translateX(3px);
+    }
+
+    .tx-item::before {
+      content: '■';
+      position: absolute;
+      top: 20px;
+      left: 8px;
+      font-size: 0.6rem;
+      color: var(--text-primary);
+    }
+
+    .tx-amount {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+      margin-left: 15px;
+    }
+
+    .tx-addresses {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      word-break: break-all;
+      margin-left: 15px;
+    }
+
+    .tx-hash {
+      margin-bottom: 8px;
+      margin-left: 15px;
+    }
+
+    .tx-hash a {
+      color: var(--text-primary);
+      text-decoration: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .tx-hash a:hover {
+      text-decoration: underline;
+    }
+
+    .tx-date {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      margin-left: 15px;
+      font-weight: 500;
+    }
+
+    .loading-spinner {
+      text-align: center;
+      padding: 30px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .loading-spinner::before {
+      content: '■ ';
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    /* Pixel hover effects */
+    .pixel-hover {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pixel-hover::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        linear-gradient(45deg, var(--text-primary) 25%, transparent 25%),
+        linear-gradient(-45deg, var(--text-primary) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, var(--text-primary) 75%),
+        linear-gradient(-45deg, transparent 75%, var(--text-primary) 75%);
+      background-size: 4px 4px;
+      background-position: 0 0, 0 2px, 2px -2px, -2px 0px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+
+    .pixel-hover:hover::after {
+      opacity: 0.1;
+    }
+
+    /* Glitch effect */
+    @keyframes pixelGlitch {
+      0% { transform: translateX(0); }
+      20% { transform: translateX(-2px); }
+      40% { transform: translateX(2px); }
+      60% { transform: translateX(-1px); }
+      80% { transform: translateX(1px); }
+      100% { transform: translateX(0); }
+    }
+
+    .glitch:hover {
+      animation: pixelGlitch 0.3s ease-in-out;
+    }
+
+    /* Success animation */
+    @keyframes successPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+
+    .status-text.success {
+      animation: successPulse 0.6s ease-out;
+    }
+
+    /* Theme transitions */
+    * {
+      transition: background-color var(--transition), 
+                  color var(--transition), 
+                  border-color var(--transition),
+                  box-shadow var(--transition);
+    }
+
+    /* Responsive design */
+    @media (max-width: 600px) {
+      .container {
+        padding: 30px 20px;
+        margin: 10px;
+        box-shadow: 4px 4px 0 var(--border-color);
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      input, button {
+        padding: 15px;
+      }
+
+      .theme-toggle {
+        top: 15px;
+        right: 15px;
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+      }
+    }
+
+    /* Loading animation for the whole page */
+    @keyframes pageLoad {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    body {
+      animation: pageLoad 0.5s ease-out;
+    }
+  </style>
+</head>
+<body data-theme="light">
+  <button class="theme-toggle" id="themeToggle" title="Toggle Theme">
+    <span id="themeIcon">◐</span>
+  </button>
+
+  <div class="container">
+    <h1 class="glitch">Tip Creator</h1>
+    <p class="subtitle">Send ETH tips to support this thread on Base network</p>
+    
+    <div class="thread-box" id="threadBox">
+      <!-- Thread link will be loaded here -->
+    </div>
+
+    <div class="recipient-info">
+      <div class="recipient-label">Recipient Address</div>
+      <div class="recipient-address" id="recipient">Loading...</div>
+    </div>
+
+    <div class="wallet-section">
+      <button id="connectBtn" class="secondary-btn pixel-hover">Connect Wallet</button>
+      <div id="connectedAddr" class="connected-address"></div>
+    </div>
+
+    <div class="amount-section">
+      <div class="form-group">
+        <label>Tip Amount</label>
+        <input type="number" id="amount" class="pixel-hover" placeholder="Amount in ETH (e.g. 0.01)" step="0.0001" />
+      </div>
+      <div class="button-container">
+        <button id="sendBtn" class="pixel-hover">Send Tip</button>
+      </div>
+    </div>
+
+    <div id="status" class="status-text"></div>
+
+    <div class="history-section">
+      <h3>Transaction History</h3>
+      <div class="tx-history" id="txHistory">
+        <div class="loading-spinner">Loading transactions...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Theme management
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const body = document.body;
+
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    body.setAttribute('data-theme', savedTheme);
+    themeIcon.textContent = savedTheme === 'light' ? '◑' : '◐';
+
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = body.getAttribute('data-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      
+      body.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      themeIcon.textContent = newTheme === 'light' ? '◑' : '◐';
+      
+      themeToggle.style.transform = 'rotate(180deg)';
+      setTimeout(() => {
+        themeToggle.style.transform = 'rotate(0deg)';
+      }, 300);
+    });
+
+    // Tip functionality
+    const SUPABASE_URL = "https://uzvczcmoihyruzsvcism.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV6dmN6Y21vaWh5cnV6c3ZjaXNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NjI3ODAsImV4cCI6MjA3MDIzODc4MH0.hZkW-YzKL6MxORxHwE5Zu1A19_Mb9LhM0YfXZ2xHQ40";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const params = new URLSearchParams(window.location.search);
+    const tipId = params.get('id');
+
+    const threadBox = document.getElementById('threadBox');
+    const recipientEl = document.getElementById('recipient');
+    const connectBtn = document.getElementById('connectBtn');
+    const connectedAddr = document.getElementById('connectedAddr');
+    const amountInput = document.getElementById('amount');
+    const sendBtn = document.getElementById('sendBtn');
+    const statusEl = document.getElementById('status');
+    const txHistoryEl = document.getElementById('txHistory');
+
+    let provider, signer, userAddress;
+    let recipientAddress = null;
+
+    async function loadTip() {
+      if (!tipId) { 
+        showStatus('■ Invalid link', 'error');
+        return; 
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('tip_links')
+          .select('*')
+          .eq('id', tipId)
+          .single();
+        
+        if (error || !data) { 
+          showStatus('■ Tip link not found', 'error');
+          return; 
+        }
+
+        threadBox.innerHTML = `<a href="${data.thread_link}" target="_blank">${data.thread_link}</a>`;
+        recipientEl.textContent = data.wallet_address;
+        recipientAddress = data.wallet_address;
+        await loadTxHistory();
+      } catch (err) {
+        console.error('Load tip error:', err);
+        showStatus('■ Failed to load tip information', 'error');
+      }
+    }
+
+    async function connectWallet() {
+      if (!window.ethereum) {
+        showStatus('■ MetaMask not detected. Please install MetaMask browser extension.', 'error');
+        return false;
+      }
+
+      try {
+        connectBtn.classList.add('loading');
+        connectBtn.disabled = true;
+        connectBtn.textContent = 'Connecting...';
+        showStatus('■ Connecting to wallet...', '');
+
+        // Request account access
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        const accounts = await provider.send("eth_requestAccounts", []);
+        
+        if (accounts.length === 0) {
+          throw new Error('No accounts found');
+        }
+
+        signer = provider.getSigner();
+        userAddress = accounts[0];
+        
+        // Update UI
+        connectedAddr.textContent = `Connected: ${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
+        connectedAddr.classList.add('show');
+        connectBtn.textContent = 'Connected ✓';
+        connectBtn.classList.remove('secondary-btn');
+        connectBtn.style.background = 'var(--text-primary)';
+        connectBtn.style.color = 'var(--bg-primary)';
+
+        // Check network
+        await checkNetwork();
+        return true;
+        
+      } catch (err) {
+        console.error('Wallet connection error:', err);
+        
+        let errorMsg = '■ Failed to connect wallet';
+        if (err.code === 4001) {
+          errorMsg = '■ Connection rejected by user';
+        } else if (err.code === -32002) {
+          errorMsg = '■ Connection request already pending. Please check MetaMask';
+        } else if (err.message.includes('No accounts found')) {
+          errorMsg = '■ No accounts found in MetaMask';
+        }
+        
+        showStatus(errorMsg, 'error');
+        resetWalletConnection();
+        return false;
+      } finally {
+        connectBtn.classList.remove('loading');
+        connectBtn.disabled = false;
+      }
+    }
+
+    async function checkNetwork() {
+      try {
+        const network = await provider.getNetwork();
+        const baseSepoliaChainId = 84532; // Base Sepolia chain ID
+        
+        if (network.chainId !== baseSepoliaChainId) {
+          showStatus('■ Switching to Base Sepolia network...', '');
+          
+          try {
+            await window.ethereum.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: `0x${baseSepoliaChainId.toString(16)}` }],
+            });
+            showStatus('■ Connected to Base Sepolia!', 'success');
+            return true;
+          } catch (switchError) {
+            if (switchError.code === 4902) {
+              return await addBaseSepoliaNetwork();
+            }
+            throw switchError;
+          }
+        }
+        showStatus('■ Connected to Base Sepolia!', 'success');
+        return true;
+      } catch (err) {
+        console.error('Network check error:', err);
+        showStatus('■ Please switch to Base Sepolia network in MetaMask', 'error');
+        return false;
+      }
+    }
+
+    async function addBaseSepoliaNetwork() {
+      try {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [{
+            chainId: '0x14a34',
+            chainName: 'Base Sepolia',
+            rpcUrls: ['https://sepolia.base.org'],
+            nativeCurrency: {
+              name: 'Sepolia Ether',
+              symbol: 'ETH',
+              decimals: 18,
+            },
+            blockExplorerUrls: ['https://sepolia.basescan.org/'],
+          }],
+        });
+        showStatus('■ Base Sepolia network added!', 'success');
+        return true;
+      } catch (addError) {
+        console.error('Failed to add Base Sepolia network:', addError);
+        showStatus('■ Failed to add Base Sepolia network. Please add it manually in MetaMask.', 'error');
+        return false;
+      }
+    }
+
+    function resetWalletConnection() {
+      connectedAddr.textContent = '';
+      connectedAddr.classList.remove('show');
+      connectBtn.textContent = 'Connect Wallet';
+      connectBtn.classList.add('secondary-btn');
+      connectBtn.style.background = '';
+      connectBtn.style.color = '';
+      userAddress = null;
+      signer = null;
+      provider = null;
+    }
+
+    async function sendTip() {
+      if (!signer) {
+        const connected = await connectWallet();
+        if (!connected) return;
+      }
+
+      const amount = amountInput.value;
+      if (!amount || Number(amount) <= 0) {
+        showStatus('■ Please enter a valid amount', 'error');
+        return;
+      }
+
+      try {
+        sendBtn.classList.add('loading');
+        sendBtn.disabled = true;
+        sendBtn.textContent = 'Sending...';
+        showStatus('■ Preparing transaction...', '');
+
+        const tx = await signer.sendTransaction({ 
+          to: recipientAddress, 
+          value: ethers.utils.parseEther(amount) 
+        });
+        
+        showStatus(`■ Transaction sent! <a href="https://sepolia.basescan.org/tx/${tx.hash}" target="_blank">View on BaseScan</a>`, 'success');
+        
+        const receipt = await tx.wait();
+        showStatus(`■ Transaction confirmed! <a href="https://sepolia.basescan.org/tx/${receipt.transactionHash}" target="_blank">View on BaseScan</a>`, 'success');
+
+        // Save transaction to Supabase
+        await supabase.from('transactions').insert([{ 
+          tip_id: tipId, 
+          tx_hash: receipt.transactionHash, 
+          from_address: userAddress, 
+          to_address: recipientAddress, 
+          amount_eth: amount 
+        }]);
+        
+        await loadTxHistory();
+        amountInput.value = '';
+        
+      } catch (err) {
+        console.error('Send transaction error:', err);
+        
+        let errorMsg = '■ Transaction failed';
+        if (err.code === 4001) {
+          errorMsg = '■ Transaction rejected by user';
+        } else if (err.message.includes('insufficient funds')) {
+          errorMsg = '■ Insufficient funds for transaction';
+        } else if (err.message.includes('network mismatch')) {
+          errorMsg = '■ Wrong network. Please switch to Base Sepolia';
+        }
+        
+        showStatus(errorMsg, 'error');
+      } finally {
+        sendBtn.classList.remove('loading');
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Send Tip';
+      }
+    }
+
+    async function loadTxHistory() {
+      txHistoryEl.innerHTML = '<div class="loading-spinner">Loading transactions...</div>';
+      
+      try {
+        const { data, error } = await supabase
+          .from('transactions')
+          .select('*')
+          .eq('tip_id', tipId)
+          .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        if (!data || data.length === 0) {
+          txHistoryEl.innerHTML = '<div class="loading-spinner">No transactions yet</div>';
+          return;
+        }
+
+        txHistoryEl.innerHTML = data.map(t => `
+          <div class="tx-item">
+            <div class="tx-amount">${t.amount_eth} ETH</div>
+            <div class="tx-addresses">From: ${t.from_address.slice(0, 6)}...${t.from_address.slice(-4)}</div>
+            <div class="tx-addresses">To: ${t.to_address.slice(0, 6)}...${t.to_address.slice(-4)}</div>
+            <div class="tx-hash">
+              <a href="https://sepolia.basescan.org/tx/${t.tx_hash}" target="_blank">${t.tx_hash.slice(0, 16)}...${t.tx_hash.slice(-8)}</a>
+            </div>
+            <div class="tx-date">${new Date(t.created_at).toLocaleString()}</div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error('Load transaction history error:', err);
+        txHistoryEl.innerHTML = '<div class="loading-spinner">Failed to load transaction history</div>';
+      }
+    }
+
+    function showStatus(message, type = '') {
+      const icons = {
+        success: '■',
+        error: '■',
+        warning: '■',
+        '': '■'
+      };
+      
+      const icon = icons[type] || icons[''];
+      statusEl.className = `status-text show ${type}`;
+      statusEl.innerHTML = `<span class="status-icon">${icon}</span> ${message}`;
+    }
+
+    // Event listeners
+    connectBtn.addEventListener('click', connectWallet);
+    sendBtn.addEventListener('click', sendTip);
+
+    // Initialize
+    loadTip();
+
+    // Check if already connected
+    window.addEventListener('load', async () => {
+      if (window.ethereum && window.ethereum.selectedAddress) {
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        signer = provider.getSigner();
+        userAddress = await signer.getAddress();
+        
+        connectedAddr.textContent = `Connected: ${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
+        connectedAddr.classList.add('show');
+        connectBtn.textContent = 'Connected ✓';
+        connectBtn.classList.remove('secondary-btn');
+        connectBtn.style.background = 'var(--text-primary)';
+        connectBtn.style.color = 'var(--bg-primary)';
+        
+        await checkNetwork();
+      }
+    });
+
+    // Network change listener
+    if (window.ethereum) {
+      window.ethereum.on('chainChanged', (chainId) => {
+        window.location.reload();
+      });
+
+      window.ethereum.on('accountsChanged', (accounts) => {
+        if (accounts.length === 0) {
+          resetWalletConnection();
+          showStatus('■ Wallet disconnected', 'warning');
+        } else if (accounts[0] !== userAddress) {
+          window.location.reload();
+        }
+      });
+    }
+  </script>
+</body>
+</html>
