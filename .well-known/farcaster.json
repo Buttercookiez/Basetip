@@ -8,6 +8,7 @@
     "version": "1",
     "name": "BaseTip",
     "url": "https://basetip-blond.vercel.app",
+    "homeUrl": "https://basetip-blond.vercel.app",
     "iconUrl": "https://basetip-blond.vercel.app/icon.png"
   },
   "baseBuilder": {
