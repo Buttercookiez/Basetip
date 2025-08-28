@@ -10,6 +10,9 @@
     "url": "https://basetip-blond.vercel.app"
   },
   "baseBuilder": {
-    "allowedAddresses": ["0x1193511263Dc06026184BB05D445219e32969a5F"]
+    "allowedAddresses": [
+      "0x1193511263Dc06026184BB05D445219e32969a5F",
+      "0x548d1097d34Ea69eaBAA046ea665C31fb4e7AD9F"
+    ]
   }
 }
