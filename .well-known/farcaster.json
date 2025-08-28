@@ -8,7 +8,8 @@
     "name": "BaseTip",
     "url": "https://basetip-blond.vercel.app",
     "homeUrl": "https://basetip-blond.vercel.app",
-    "iconUrl": "https://basetip-blond.vercel.app/icon.png"
+    "iconUrl": "https://basetip-blond.vercel.app/icon.png",
+    "manifestUrl": "https://basetip-blond.vercel.app/manifest.json"
   },
   "baseBuilder": {
     "allowedAddresses": [
