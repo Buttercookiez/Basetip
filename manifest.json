@@ -1,0 +1,16 @@
+{
+  "name": "BaseTip",
+  "short_name": "BaseTip",
+  "description": "A Farcaster frame for tipping on Base",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0052ff",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
