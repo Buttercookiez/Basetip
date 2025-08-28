@@ -1,0 +1,1 @@
+TipMyThread makes tipping creators on Twitter threads easy via Base. Connect a wallet, choose an amount, send a tip, and track it via Supabase.

@@ -1,0 +1,4 @@
+- Node.js v18+
+- Metamask or Base-compatible wallet
+- Supabase project
+- Base RPC endpoint

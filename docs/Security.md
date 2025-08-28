@@ -1,0 +1,2 @@
+- Never expose private keys in frontend.
+- Use `.env` and server-side functions for sensitive actions.

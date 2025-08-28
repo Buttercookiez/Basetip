@@ -1,0 +1,1 @@
+No external API. Uses Base RPC for blockchain calls and Supabase REST API for logging.

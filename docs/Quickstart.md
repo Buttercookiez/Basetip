@@ -1,0 +1,9 @@
+1. Clone repo.
+2. Install dependencies (`npm install`).
+3. Create `.env` with keys:
+```
+SUPABASE_URL=...
+SUPABASE_ANON_KEY=...
+BASE_RPC_URL=...
+```
+4. Run `npm run dev`.
