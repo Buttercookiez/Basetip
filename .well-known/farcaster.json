@@ -1,8 +1,8 @@
 {
   "accountAssociation": {
-    "address": "0x548d1097d34ea69eabaa046ea665c31fb4e7ad9f",
-    "message": "{\"domain\":\"basetip-blond.vercel.app\",\"timestamp\":1735396300}",
-    "signature": "0x416faa8e204a24bfb0dc42eb3b6a7f6efb351775824dc27d1b1ef41efbc99f2e68b11d4c3d8aea4d6bd70dadb0eeb7f04350801c462ed0f2f573bed9c3b239d71c"
+    "header": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9",
+    "payload": "eyJkb21haW4iOiJiYXNldGlwLWJsb25kLnZlcmNlbC5hcHAiLCJ0aW1lc3RhbXAiOjE3MzUzOTYzMDB9",
+    "signature": "416faa8e204a24bfb0dc42eb3b6a7f6efb351775824dc27d1b1ef41efbc99f2e68b11d4c3d8aea4d6bd70dadb0eeb7f04350801c462ed0f2f573bed9c3b239d71c"
   },
   "miniapp": {
     "name": "BaseTip",
