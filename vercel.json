@@ -1,18 +1,13 @@
 {
-  "accountAssociation": {
-    "address": "0x548d1097d34Ea69eaBAA046ea665C31fb4e7AD9F",
-    "signature": "0xfde0416477543802ab9f950cc993d08b170ee20c8e8be25ffc6414c168c6d8b1709aacdcf7d0414c3ce3b5e7e1f997d1f44c26ba17aa55f73bd829d014b258111c"
+  "functions": {
+    "pages/api/**/*.js": {
+      "runtime": "nodejs18.x"
+    }
   },
-  "frame": {
-    "version": "1",
-    "name": "BaseTip",
-    "url": "https://basetip-blond.vercel.app",
-    "homeUrl": "https://basetip-blond.vercel.app",
-    "iconUrl": "https://basetip-blond.vercel.app/icon.png"
-  },
-  "baseBuilder": {
-    "allowedAddresses": [
-      "0x1193511263Dc06026184BB05D445219e32969a5F"
-    ]
-  }
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/pages/$1"
+    }
+  ]
 }
