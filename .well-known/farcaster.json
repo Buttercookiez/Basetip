@@ -7,7 +7,8 @@
   "frame": {
     "version": "1",
     "name": "BaseTip",
-    "url": "https://basetip-blond.vercel.app"
+    "url": "https://basetip-blond.vercel.app",
+    "iconUrl": "https://basetip-blond.vercel.app/icon.png"
   },
   "baseBuilder": {
     "allowedAddresses": ["0x1193511263Dc06026184BB05D445219e32969a5F"]
